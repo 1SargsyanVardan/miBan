@@ -1,0 +1,114 @@
+﻿/* General Reset */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+    color: #333;
+}
+
+/* Centering the Form or Containers */
+form, #courses-container, #students-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Headings */
+h2, h3 {
+    text-align: center;
+    color: #4a90e2;
+    margin-bottom: 20px;
+}
+
+/* List Styling */
+.list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list-group-item {
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+    .list-group-item:hover {
+        background-color: #e8f0fe;
+    }
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    font-size: 14px;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #f8f9fa;
+    transition: border-color 0.3s ease-in-out;
+}
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+        border-color: #4a90e2;
+        outline: none;
+    }
+
+/* Error Message Styling */
+.text-danger {
+    font-size: 12px;
+    color: #e74c3c;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4a90e2;
+    color: #ffffff;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+    button:hover {
+        background-color: #357abd;
+    }
+
+/* Alert Box */
+.alert {
+    margin-top: 20px;
+    padding: 15px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #e74c3c;
+    border-radius: 5px;
+    text-align: center;
+}

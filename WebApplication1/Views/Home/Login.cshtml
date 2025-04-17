@@ -1,0 +1,32 @@
+﻿@* @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers *@
+@model WebApplication1.HelperClasses.LoginDtoForHome
+@{
+    ViewData["Title"] = "Login";
+}
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Login</h2>
+
+<form method="post" asp-action="Login">
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input id="email" asp-for="Email" type="text" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input id="password" asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn">Login</button>
+</form>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}

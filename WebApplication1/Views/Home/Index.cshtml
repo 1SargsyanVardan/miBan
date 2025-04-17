@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Courses";
+}
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Your Courses</h2>
+
+<div id="courses-container">
+    <ul id="courses-list" class="list-group">
+        @* Կուրսերը կլրացվեն JavaScript-ի միջոցով *@
+    </ul>
+</div>
+
+<div id="students-container" style="display: none;">
+    <h3>Students in Selected Course</h3>
+    <ul id="students-list" class="list-group">
+        @* Ուսանողները կլրացվեն JavaScript-ի միջոցով *@
+    </ul>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Fetch and display courses
+        fetch("/api/Teacher/CoursesByTeacher")
+            .then(response => {
+                if (!response.ok) {
+                    console.error("Failed to fetch courses:", response.statusText);
+                    return [];
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Courses data:", data); // Ստուգեք՝ արդյոք ճիշտ տվյալներ եք ստանում
+        fetch("/api/Teacher/CoursesByTeacher")
+            .then(response => response.json())
+            .then(data => {
+                const coursesList = document.getElementById("courses-list");
+
+                if (data.length === 0) {
+                    coursesList.innerHTML = "<li class='list-group-item'>No courses available.</li>";
+                    return;
+                }
+
+                data.forEach(course => {
+                    const listItem = document.createElement("li");
+                    listItem.className = "list-group-item";
+                    listItem.textContent = course.courseName;
+                    listItem.dataset.courseId = course.courseId;
+
+                    listItem.addEventListener("click", function () {
+                        fetch(`/api/Teacher/Students/${this.dataset.courseId}`)
+                            .then(response => response.json())
+                            .then(students => {
+                                const studentsContainer = document.getElementById("students-container");
+                                const studentsList = document.getElementById("students-list");
+
+                                studentsList.innerHTML = ""; // Clear previous students
+                                if (students.length === 0) {
+                                    studentsList.innerHTML = "<li class='list-group-item'>No students in this course.</li>";
+                                } else {
+                                    students.forEach(student => {
+                                        const studentItem = document.createElement("li");
+                                        studentItem.className = "list-group-item";
+                                        studentItem.textContent = `${student.firstName} ${student.lastName}`;
+                                        studentsList.appendChild(studentItem);
+                                    });
+                                }
+
+                                studentsContainer.style.display = "block";
+                            })
+                            .catch(error => console.error("Error fetching students:", error));
+                    });
+
+                    coursesList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error("Error fetching courses:", error));
+    });
+</script>
