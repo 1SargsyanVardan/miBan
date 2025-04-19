@@ -75,7 +75,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet("GetCoursesByGroup")]
-        public async Task<IActionResult> GetCoursesByGroup([FromBody] DepAndGroupModel model)
+        public async Task<IActionResult> GetCoursesByGroup([FromBody] DepAndGroupRequest model)
         {
             List<CourseResponseModel> result = new List<CourseResponseModel>();
 
@@ -111,7 +111,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("ChangePassword")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePassDtoModel model)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePassRequest model)
         {
             if (model.NewPassword != model.ConfirmNewPassword)
             {
@@ -191,7 +191,7 @@ namespace WebApplication1.Controllers
             return Ok(teacherModels);
         }
         [HttpPost("EvaluateTeacher")]
-        public async Task<IActionResult> EvaluateTeacher([FromBody] EvaluationRequestModel evaluation)
+        public async Task<IActionResult> EvaluateTeacher([FromBody] EvaluationRequest evaluation)
         {
             var evaluatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

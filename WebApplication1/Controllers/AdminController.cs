@@ -79,7 +79,7 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public IActionResult VerifyEmail([FromBody] EmailVerificationModel model)
+        public IActionResult VerifyEmail([FromBody] EmailVerificationRequest model)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
             if (user == null)
@@ -124,7 +124,7 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePassDtoModel model)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePassRequest model)
         {
             if (model.NewPassword != model.ConfirmNewPassword)
             {
@@ -532,7 +532,7 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public IActionResult VerifyEmail([FromBody] EmailVerificationModel model)
+        public IActionResult VerifyEmail([FromBody] EmailVerificationRequest model)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
             if (user == null)
@@ -577,7 +577,7 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePassDtoModel model)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePassRequest model)
         {
             if (model.NewPassword != model.ConfirmNewPassword)
             {

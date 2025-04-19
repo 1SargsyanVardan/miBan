@@ -55,7 +55,7 @@ namespace WebApplication1.HelperClasses
             return string.Empty;
         }
 
-        public string CheckEvaluationByUser(EvaluationRequestModel evaluation, string evaluatorId, string whomEvaluate, AppDbContext _context)
+        public string CheckEvaluationByUser(EvaluationRequest evaluation, string evaluatorId, string whomEvaluate, AppDbContext _context)
         {
 
             if (!int.TryParse(evaluatorId, out int parsedEvaluatorId))

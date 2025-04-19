@@ -23,7 +23,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDtoModel loginDto)
+        public IActionResult Login([FromBody] LoginDtoRequest loginDto)
         {
             var user = AuthenticateUser(loginDto);
             if (user == null)
@@ -33,7 +33,7 @@ namespace WebApplication1.Controllers
             return Ok(new { token });
         }
 
-        private User AuthenticateUser(LoginDtoModel loginDto)
+        private User AuthenticateUser(LoginDtoRequest loginDto)
         {
             var user = _dbContext.Users.FirstOrDefault(u => u.Email == loginDto.Email);
             if (user == null) return null;

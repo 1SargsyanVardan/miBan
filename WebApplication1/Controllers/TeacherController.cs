@@ -58,7 +58,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("ChangePassword")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePassDtoModel model)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePassRequest model)
         {
             if (model.NewPassword != model.ConfirmNewPassword)
             {
@@ -140,7 +140,7 @@ namespace WebApplication1.Controllers
             return Ok(studentModels);
         }
         [HttpPost("EvaluateStudent")]
-        public async Task<IActionResult> EvaluateStudent([FromBody] EvaluationRequestModel evaluation)
+        public async Task<IActionResult> EvaluateStudent([FromBody] EvaluationRequest evaluation)
         {
             var evaluatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

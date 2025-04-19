@@ -1,6 +1,6 @@
 ﻿namespace WebApplication1.Models.MyModels.Request
 {
-    public class ChangePassDtoModel
+    public class ChangePassRequest
     {
         public string OldPassword { get; set; }
         public string NewPassword { get; set; }
