@@ -1,4 +1,4 @@
-﻿namespace WebApplication1.Models.MyModels
+﻿namespace WebApplication1.Models.MyModels.Response
 {
     public class TeacherModelForStudent
     {

@@ -6,7 +6,8 @@ using System.Security.Claims;
 using System.Text.RegularExpressions;
 using WebApplication1.HelperClasses;
 using WebApplication1.Models;
-using WebApplication1.Models.MyModels;
+using WebApplication1.Models.MyModels.Request;
+using WebApplication1.Models.MyModels.Response;
 
 namespace WebApplication1.Controllers
 {
@@ -48,7 +49,7 @@ namespace WebApplication1.Controllers
         [HttpGet("Courses")]
         public IActionResult GetCourses()
         {
-            List<CourseModel> result = new List<CourseModel>();
+            List<CourseResponseModel> result = new List<CourseResponseModel>();
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var user = _context.Users.FirstOrDefault(x => x.UserId == userId);
@@ -67,7 +68,7 @@ namespace WebApplication1.Controllers
 
             foreach (var c in courses)
             {
-                result.Add(new CourseModel(c.CourseName, c.Description, c.TeacherName));
+                result.Add(new CourseResponseModel(c.CourseName, c.Description, c.TeacherName));
             }
 
             return Ok(result);
@@ -76,7 +77,7 @@ namespace WebApplication1.Controllers
         [HttpGet("GetCoursesByGroup")]
         public async Task<IActionResult> GetCoursesByGroup([FromBody] DepAndGroupModel model)
         {
-            List<CourseModel> result = new List<CourseModel>();
+            List<CourseResponseModel> result = new List<CourseResponseModel>();
 
             var groupId = _context.Groups
                         .Where(g => g.GroupNumber == model.GroupNumber &&
@@ -103,7 +104,7 @@ namespace WebApplication1.Controllers
 
             foreach (var c in courses)
             {
-                result.Add(new CourseModel(c.CourseName, c.Description, c.TeacherName));
+                result.Add(new CourseResponseModel(c.CourseName, c.Description, c.TeacherName));
             }
 
             return Ok(result);
@@ -177,7 +178,7 @@ namespace WebApplication1.Controllers
                 })
                 .ToListAsync();
 
-            var teacherModels = teachers.Select(t => new EvaluationModel
+            var teacherModels = teachers.Select(t => new EvaluationResponseModel
             {
                 Id = t.UserId,
                 FirstName = t.FirstName,

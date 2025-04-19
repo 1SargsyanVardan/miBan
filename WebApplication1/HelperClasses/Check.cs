@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using WebApplication1.Models;
-using WebApplication1.Models.MyModels;
+using WebApplication1.Models.MyModels.Request;
 
 namespace WebApplication1.HelperClasses
 {
@@ -17,7 +17,7 @@ namespace WebApplication1.HelperClasses
                 return true;
         }
 
-        public string CheckUser(UserModel userModel, AppDbContext _context)
+        public string CheckUser(UserRegisterRequest userModel, AppDbContext _context)
         {
             if (_context.Users.Any(u => u.Email == userModel.Email))
             {

@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using WebApplication1.HelperClasses;
 using WebApplication1.Models;
 using WebApplication1.Models.MyModels;
+using WebApplication1.Models.MyModels.Request;
+using WebApplication1.Models.MyModels.Response;
 
 namespace WebApplication1.Controllers
 {
@@ -125,7 +127,7 @@ namespace WebApplication1.Controllers
                 })
                 .ToListAsync();
 
-            var studentModels = students.Select(s => new EvaluationModel
+            var studentModels = students.Select(s => new EvaluationResponseModel
             {
                 Id = s.UserId,
                 FirstName = s.FirstName,

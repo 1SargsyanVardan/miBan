@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.HelperClasses;
 using WebApplication1.Models;
-using WebApplication1.Models.MyModels;
+using WebApplication1.Models.MyModels.Request;
 
 namespace WebApplication1.Controllers
 {
@@ -20,7 +20,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("create-admin")]
-        public IActionResult CreateAdmin([FromBody] UserModel userModel)
+        public IActionResult CreateAdmin([FromBody] UserRegisterRequest userModel)
         {
             var user = _mapper.Map<User>(userModel);
             user.PasswordHash = PasswordHelper.HashPassword(userModel.PasswordHash); 

@@ -1,10 +1,10 @@
-﻿namespace WebApplication1.Models.MyModels
+﻿namespace WebApplication1.Models.MyModels.Request
 {
     public class EvaluationRequestModel
     {
         public int EvaluateeID { get; set; }  // gnahatvoxi ID
         public List<EvaluationScoreRequest> Scores { get; set; }
-       
+
     }
     public class EvaluationScoreRequest
     {

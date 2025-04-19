@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using WebApplication1.Models;
 using WebApplication1.HelperClasses;
-using WebApplication1.Models.MyModels;
+using WebApplication1.Models.MyModels.Request;
 
 namespace WebApplication1.Controllers
 {

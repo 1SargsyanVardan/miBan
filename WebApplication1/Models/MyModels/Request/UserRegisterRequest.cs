@@ -1,6 +1,6 @@
-﻿namespace WebApplication1.Models.MyModels
+﻿namespace WebApplication1.Models.MyModels.Request
 {
-    public class UserModel
+    public class UserRegisterRequest
     {
         public string FirstName { get; set; } = null!;
 
@@ -14,7 +14,5 @@
 
         public string Description { get; set; }
         public int GroupId { get; set; }
-        public string? VerificationCode { get; set; }
-        public bool IsEmailConfirmed { get; set; } = false;
     }
 }

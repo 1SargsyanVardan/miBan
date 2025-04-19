@@ -1,6 +1,6 @@
-﻿namespace WebApplication1.Models.MyModels
+﻿namespace WebApplication1.Models.MyModels.Response
 {
-    public class EvaluationModel
+    public class EvaluationResponseModel
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
