@@ -8,10 +8,11 @@ using System.Text.RegularExpressions;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using WebApplication1.Models.MyModels.Response;
 
 namespace WebApplication1.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class AdminController : ControllerBase
@@ -407,18 +408,25 @@ namespace WebApplication1.Controllers
         }
         // 8. Ուսանողների ստացում
         [HttpGet("Students")]
-        [ProducesResponseType(typeof(List<User>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<UserGetResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetStudents()
         {
             var users = _context.Users.Where(u => u.Role == "Student").ToList();
 
-            if (users == null || users.Count == 0)
+            List<UserGetResponse> userResponse = new();
+            foreach (var user in users)
+            {
+                userResponse.Add(_mapper.Map<UserGetResponse>(user));
+            }
+            //var user = _mapper.Map<UserGetResponse>(users);
+
+            if (userResponse == null || userResponse.Count == 0)
             {
                 return NotFound("Ոչ մի ուսանող չգտնվեց:");
             }
 
-            return Ok(users);
+            return Ok(userResponse);
         }
         // 9. Ադմինների ստացում
         [HttpGet("Admins")]

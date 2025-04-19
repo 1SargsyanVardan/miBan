@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using WebApplication1.Models;
 using WebApplication1.Models.MyModels;
+using WebApplication1.Models.MyModels.Response;
 
 namespace WebApplication1.HelperClasses
 {
@@ -18,6 +19,7 @@ namespace WebApplication1.HelperClasses
                 .ForMember(dest => dest.Criterias, opt => opt.Ignore()); 
 
             CreateMap<Criterion, CriterionModel>(); 
+            CreateMap<User, UserGetResponse>(); 
 
         }
     }
