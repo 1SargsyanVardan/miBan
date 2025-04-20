@@ -14,5 +14,9 @@
 
         public string Description { get; set; }
         public int GroupId { get; set; }
+
+        public string? VerificationCode { get; set; }
+
+        public bool IsEmailConfirmed { get; set; }
     }
 }
