@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using WebApplication1.HelperClasses;
@@ -17,24 +19,45 @@ namespace WebApplication1.Controllers
     public class TeacherController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public TeacherController(AppDbContext context)
+        public TeacherController(AppDbContext context,IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet("Students/{courseId}")]
+        [ProducesResponseType(typeof(List<UserGetResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetStudentsByCourseId(int courseId)
         {
+            var course = _context.Courses.Where(cId => cId.CourseId == courseId);
+            if (!course.Any()) { 
+                return BadRequest("Սխալ CourseId");
+            }
             var students = _context.StudentCourses
                 .Where(sc => sc.CourseId == courseId)
                 .Select(sc => sc.Student)
                 .ToList();
+            if(students.Count()==0)
+            {
+                return NotFound("Տվյալ կուրսում ուսանող չկա");
+            }
+            List<UserGetResponse> userGetResponse = new List<UserGetResponse>();
 
-            return Ok(students);
+            foreach (var student in students)
+            {
+                userGetResponse.Add(_mapper.Map<UserGetResponse>(students));
+            }
+
+            return Ok(userGetResponse);
         }
 
         [HttpGet("CoursesByTeacher")]
+        [ProducesResponseType(typeof(List<Course>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetAllGroups()
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -51,13 +74,18 @@ namespace WebApplication1.Controllers
 
             if (!courses.Any())
             {
-                return NotFound("No courses found for the current teacher.");
+                return NotFound("Տվյալ դասախոսի համար չկան դասընթացներ");
             }
 
             return Ok(courses);
         }
 
         [HttpPost("ChangePassword")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePassRequest model)
         {
             if (model.NewPassword != model.ConfirmNewPassword)
@@ -96,6 +124,9 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet("StudentsForEvaluate/{departmentYear}/{groupNumber}")]
+        [ProducesResponseType(typeof(List<EvaluationResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentsGroupName(int departmentYear, int groupNumber)
         {
             var department = await _context.Departments
@@ -140,6 +171,8 @@ namespace WebApplication1.Controllers
             return Ok(studentModels);
         }
         [HttpPost("EvaluateStudent")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> EvaluateStudent([FromBody] EvaluationRequest evaluation)
         {
             var evaluatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);

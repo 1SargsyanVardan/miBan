@@ -393,18 +393,24 @@ namespace WebApplication1.Controllers
 
         // 7. Դասախոսների ստացում
         [HttpGet("Teachers")]
-        [ProducesResponseType(typeof(List<User>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<UserGetResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetTeachers()
         {
             var users = _context.Users.Where(u => u.Role == "Teacher").ToList();
 
-            if (users == null || users.Count == 0)
+            List<UserGetResponse> userResponse = new();
+            foreach (var user in users)
+            {
+                userResponse.Add(_mapper.Map<UserGetResponse>(user));
+            }
+
+            if (userResponse == null || userResponse.Count == 0)
             {
                 return NotFound("Ոչ մի դասախոս չգտնվեց:");
             }
 
-            return Ok(users);
+            return Ok(userResponse);
         }
         // 8. Ուսանողների ստացում
         [HttpGet("Students")]
@@ -429,7 +435,7 @@ namespace WebApplication1.Controllers
         }
         // 9. Ադմինների ստացում
         [HttpGet("Admins")]
-        [ProducesResponseType(typeof(List<User>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<UserGetResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetAdmins()
         {
@@ -446,7 +452,7 @@ namespace WebApplication1.Controllers
                 return NotFound("Ոչ մի ադմին չգտնվեց:");
             }
 
-            return Ok(users);
+            return Ok(userResponse);
         }
     }
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using WebApplication1.HelperClasses;
@@ -23,10 +24,10 @@ namespace WebApplication1.Controllers
             _context = context;
             _mapper = mapper;
         }
-        /// <summary>
-        /// </summary>        
-        /// <param >Procedure result ORA message</param>
+        
         [HttpGet("Teachers")]
+        [ProducesResponseType(typeof(List<TeacherModelForStudent>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public IActionResult GetTeachersForStudent()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -47,6 +48,8 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet("Courses")]
+        [ProducesResponseType(typeof(List<CourseResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public IActionResult GetCourses()
         {
             List<CourseResponseModel> result = new List<CourseResponseModel>();
@@ -75,6 +78,8 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet("GetCoursesByGroup")]
+        [ProducesResponseType(typeof(List<CourseResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetCoursesByGroup([FromBody] DepAndGroupRequest model)
         {
             List<CourseResponseModel> result = new List<CourseResponseModel>();
@@ -111,6 +116,11 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("ChangePassword")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePassRequest model)
         {
             if (model.NewPassword != model.ConfirmNewPassword)
@@ -149,13 +159,16 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet("GetTeachersToEvaluate")]
+        [ProducesResponseType(typeof(List<EvaluationResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> GetTeachersToEvaluate()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!int.TryParse(userId, out int studentId))
             {
-                return BadRequest("Սխալ userID.");
+                return Unauthorized("Սխալ userID.");
             }
 
             var teachers = await _context.Users
@@ -191,6 +204,8 @@ namespace WebApplication1.Controllers
             return Ok(teacherModels);
         }
         [HttpPost("EvaluateTeacher")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> EvaluateTeacher([FromBody] EvaluationRequest evaluation)
         {
             var evaluatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);

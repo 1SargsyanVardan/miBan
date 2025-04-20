@@ -6,6 +6,8 @@ using System.Text;
 using WebApplication1.Models;
 using WebApplication1.HelperClasses;
 using WebApplication1.Models.MyModels.Request;
+using System.Net;
+using WebApplication1.Models.MyModels.Response;
 
 namespace WebApplication1.Controllers
 {
@@ -23,6 +25,8 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult Login([FromBody] LoginDtoRequest loginDto)
         {
             var user = AuthenticateUser(loginDto);
