@@ -8,6 +8,7 @@ using WebApplication1.HelperClasses;
 using WebApplication1.Models.MyModels.Request;
 using System.Net;
 using WebApplication1.Models.MyModels.Response;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication1.Controllers
 {
@@ -17,11 +18,13 @@ namespace WebApplication1.Controllers
     {
         private readonly AppDbContext _dbContext;
         private readonly IConfiguration _config;
+        private readonly AppDbContext _context;
 
-        public AuthController(AppDbContext dbContext, IConfiguration config)
+        public AuthController(AppDbContext dbContext, IConfiguration config,AppDbContext appDbContext)
         {
             _dbContext = dbContext;
             _config = config;
+            _context = appDbContext;
         }
 
         [HttpPost("login")]
@@ -35,6 +38,26 @@ namespace WebApplication1.Controllers
 
             var token = GenerateToken(user);
             return Ok(new { token });
+        }
+
+        [HttpPost("VerifyEmail")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public IActionResult VerifyEmail([FromBody] EmailVerificationRequest model)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
+            if (user == null)
+                return BadRequest("Օգտվողը գտնված չէ։");
+
+            if (user.VerificationCode != model.Code)
+                return BadRequest("Սխալ հաստատման կոդ։");
+
+            user.IsEmailConfirmed = true;
+            user.VerificationCode = null;
+            _context.SaveChanges();
+
+            return Ok("Էլ․ հասցեն հաստատվեց հաջողությամբ։");
         }
 
         private User AuthenticateUser(LoginDtoRequest loginDto)

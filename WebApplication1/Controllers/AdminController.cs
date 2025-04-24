@@ -75,25 +75,7 @@ namespace WebApplication1.Controllers
                 return StatusCode(500, "Սերվերի սխալ: Խնդրում ենք փորձել կրկին:");
             }
         }
-        [HttpPost("VerifyEmail")]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public IActionResult VerifyEmail([FromBody] EmailVerificationRequest model)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
-            if (user == null)
-                return BadRequest("Օգտվողը գտնված չէ։");
-
-            if (user.VerificationCode != model.Code)
-                return BadRequest("Սխալ հաստատման կոդ։");
-
-            user.IsEmailConfirmed = true;
-            user.VerificationCode = null;
-            _context.SaveChanges();
-
-            return Ok("Էլ․ հասցեն հաստատվեց հաջողությամբ։");
-        }
+        
 
         [HttpPost("RegisterBalk")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]

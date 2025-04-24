@@ -33,18 +33,17 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetStudentsByCourseId(int courseId)
         {
-            var course = _context.Courses.Where(cId => cId.CourseId == courseId);
-            if (!course.Any()) { 
-                return BadRequest("Սխալ CourseId");
-            }
-            var students = _context.StudentCourses
-                .Where(sc => sc.CourseId == courseId)
-                .Select(sc => sc.Student)
-                .ToList();
-            if(students.Count()==0)
+            
+            List<User> students;
+            try
             {
-                return NotFound("Տվյալ կուրսում ուսանող չկա");
+                students = getStudents(courseId);
             }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
             List<UserGetResponse> userGetResponse = new List<UserGetResponse>();
 
             foreach (var student in students)
@@ -53,6 +52,41 @@ namespace WebApplication1.Controllers
             }
 
             return Ok(userGetResponse);
+        }
+        [HttpPost("SendMail/{courseId}")]
+        [ProducesResponseType(typeof(List<UserGetResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        public IActionResult SendMailByCourseId(int courseId,string mail)
+        {
+            var course = _context.Courses.Where(cId => cId.CourseId == courseId);
+            if (!course.Any())
+            {
+                return BadRequest("Սխալ CourseId");
+            }
+            var students = _context.StudentCourses
+                .Where(sc => sc.CourseId == courseId)
+                .Select(sc => sc.Student)
+                .ToList();
+            if (students.Count() == 0)
+            {
+                return NotFound("Տվյալ կուրսում ուսանող չկա");
+            }
+
+            var teacherId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var teacher = _context.Users.FirstOrDefault(u => u.UserId == teacherId && u.Role == "Teacher");
+
+            if (teacher == null)
+            {
+                return NotFound("Համակարգում մի բան այն չէ փորձեք կրկին։");
+            }
+            EmailSender emailSender = new EmailSender();
+            foreach (var student in students)
+            {
+                emailSender.SendEmail(teacher.FirstName+" "+teacher.LastName,student.Email,mail);
+            }
+
+            return Ok();
         }
 
         [HttpGet("CoursesByTeacher")]
@@ -205,6 +239,25 @@ namespace WebApplication1.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Գնահատման պրոցեսը հաջող է ընթացել!");
+        }
+
+        private List<User> getStudents(int courseId)
+        {
+            var course = _context.Courses.Where(cId => cId.CourseId == courseId);
+            if (!course.Any())
+            {
+                throw new Exception("Սխալ CourseId");
+            }
+            var students = _context.StudentCourses
+                .Where(sc => sc.CourseId == courseId)
+                .Select(sc => sc.Student)
+                .ToList();
+            if (students.Count() == 0)
+            {
+                throw new Exception("Տվյալ կուրսում ուսանող չկա");
+            }
+
+            return students;
         }
     }
 

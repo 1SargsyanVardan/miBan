@@ -42,6 +42,41 @@ namespace WebApplication1.HelperClasses
 
             smtp.Send(message);
         }
+        public void SendEmail(string senderName,string toEmail, string mail)
+        {
+            var fromAddress = new MailAddress("politechsender@gmail.com", "PolitechAPP");
+            var toAddress = new MailAddress(toEmail);
+            const string fromPassword = "kikbtqtxmykzdnwe";
+            string subject = $"Դասախոսի կողմից նամակ՝ {senderName}";
 
+            string body = $@"
+                <html>
+                    <body>
+                        <h2>Բարև ձեզ,</h2>
+                        <strong style='font-size:18px;'>{mail}</strong>
+                        </br>
+                        <h3>Սիրով՝ {senderName}</h3>
+                    </body>
+                </html>";
+
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+
+            using var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            smtp.Send(message);
+        }
     }
 }
