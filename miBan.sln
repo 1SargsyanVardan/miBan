@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebAppli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataManager", "DataManager\DataManager.csproj", "{FCB5F6AB-0711-46FD-891F-BFE6E5E11D7B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminReminder", "AdminReminder\AdminReminder.csproj", "{3E0D4BEB-CC0F-4D26-98C4-D2F208771323}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{FCB5F6AB-0711-46FD-891F-BFE6E5E11D7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCB5F6AB-0711-46FD-891F-BFE6E5E11D7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCB5F6AB-0711-46FD-891F-BFE6E5E11D7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E0D4BEB-CC0F-4D26-98C4-D2F208771323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E0D4BEB-CC0F-4D26-98C4-D2F208771323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E0D4BEB-CC0F-4D26-98C4-D2F208771323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E0D4BEB-CC0F-4D26-98C4-D2F208771323}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

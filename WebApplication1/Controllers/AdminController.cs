@@ -26,13 +26,13 @@ namespace WebApplication1.Controllers
             _mapper = mapper;
             _check = new Check();
         }
-        [HttpGet("whoami")]
-        [Authorize]
-        public IActionResult WhoAmI()
-        {
-            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
-            return Ok(claims);
-        }
+        //[HttpGet("whoami")]
+        //[Authorize]
+        //public IActionResult WhoAmI()
+        //{
+        //    var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+        //    return Ok(claims);
+        //}
         // 1. Օգտվողի գրանցում
         [HttpPost("Register")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
