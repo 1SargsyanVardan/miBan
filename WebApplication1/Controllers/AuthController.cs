@@ -9,6 +9,7 @@ using WebApplication1.Models.MyModels.Request;
 using System.Net;
 using WebApplication1.Models.MyModels.Response;
 using Microsoft.EntityFrameworkCore;
+using NLog;
 
 namespace WebApplication1.Controllers
 {
@@ -19,7 +20,9 @@ namespace WebApplication1.Controllers
         private readonly AppDbContext _dbContext;
         private readonly IConfiguration _config;
         private readonly AppDbContext _context;
+        private static readonly NLog.ILogger Logger = LogManager.GetCurrentClassLogger();
 
+        
         public AuthController(AppDbContext dbContext, IConfiguration config,AppDbContext appDbContext)
         {
             _dbContext = dbContext;
@@ -32,12 +35,25 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         public IActionResult Login([FromBody] LoginDtoRequest loginDto)
         {
-            var user = AuthenticateUser(loginDto);
-            if (user == null)
-                return Unauthorized("Invalid credentials");
+            try
+            {
+                var user = AuthenticateUser(loginDto);
+                if (user == null)
+                    return Unauthorized("Invalid credentials");
+                Logger.Info("{0} : Login User : {1}", DateTime.Now,user.Email);
 
-            var token = GenerateToken(user);
-            return Ok(new { token });
+                var token = GenerateToken(user);
+                return Ok(new { token });
+            }
+            catch(Exception ex)
+            {
+                Logger.Error("{0} : {1} ",DateTime.Now,ex.Message);
+                return BadRequest();
+            }
+            finally
+            {
+                Logger.Info("{0} : Succes Login ", DateTime.Now);
+            }
         }
 
         [HttpPost("VerifyEmail")]

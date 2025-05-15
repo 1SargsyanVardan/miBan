@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net;
 using WebApplication1.Models.MyModels.Response;
 using WebApplication1.Models.MyModels.Request;
+using NLog;
 
 namespace WebApplication1.Controllers
 {
@@ -20,6 +21,8 @@ namespace WebApplication1.Controllers
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
         private readonly Check _check;
+        private static readonly NLog.ILogger Logger = LogManager.GetCurrentClassLogger();
+
         public AdminController(AppDbContext context, IMapper mapper)
         {
             _context = context;
@@ -149,86 +152,102 @@ namespace WebApplication1.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GenerateStudentReports()
         {
-            var criteriaIds = await _context.Evaluations
+            try 
+            {
+                var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var admin = _context.Users.FirstOrDefault(u => u.UserId == adminId && u.Role == "Admin");
+                Logger.Info("{0} : GenerateStudentReports : {1}", DateTime.Now, admin.Email);
+
+                var criteriaIds = await _context.Evaluations
                                     .Select(e => e.CriteriaId)
                                     .Distinct()
                                     .ToListAsync();
 
-            var allEvaluations = new List<object>();
-            var reports = new List<StudentReport>();
+                var allEvaluations = new List<object>();
+                var reports = new List<StudentReport>();
 
-            foreach (var criteriaId in criteriaIds)
-            {
-                var studentEvaluations = await _context.Evaluations
-                    .Where(e => e.Role == "Student" && e.CriteriaId == criteriaId)
-                    .GroupBy(e => new { e.CriteriaId, e.EvaluateeId })
-                    .Select(g => new
-                    {
-                        StudentID = g.Key.EvaluateeId,
-                        TotalScores = g.Sum(e => e.Score),
-                        AverageScore = g.Average(e => e.Score),
-                    })
-                    .OrderByDescending(e => e.TotalScores)
-                    .ToListAsync();
-
-                if (studentEvaluations.Any())
+                foreach (var criteriaId in criteriaIds)
                 {
-                    allEvaluations.Add(new
-                    {
-                        CriteriaID = criteriaId,
-                        Students = studentEvaluations
-                    });
-
-                    var studentReports = studentEvaluations.Select(evaluation => new StudentReport
-                    {
-                        ReportDate = DateTime.Now,
-                        StudentId = evaluation.StudentID,
-                        TotalScores = evaluation.TotalScores,
-                        AverageScore = evaluation.AverageScore,
-                        CriteriaId = criteriaId
-                    }).ToList();
-
-                    reports.AddRange(studentReports);
-                }
-            }
-
-            if (reports.Any())
-            {
-                _context.StudentReports.AddRange(reports);
-                await _context.SaveChangesAsync();
-
-                var evaluationsToDelete = await _context.Evaluations
-                    .Where(e => e.Role == "Student")
-                    .ToListAsync();
-
-                _context.Evaluations.RemoveRange(evaluationsToDelete);
-                await _context.SaveChangesAsync();
-            }
-
-            var criteriaDict = _context.Criteria
-                .ToDictionary(c => c.CriteriaId, c => c.CriteriaName);
-
-            var usersDict = _context.Users
-                 .Where(u => u.Role == "Student")
-                .ToDictionary(u => u.UserId, u => u.FirstName + " " + u.LastName);
-
-            var formattedReports = allEvaluations
-                .Select(e => new
-                {
-                    CriteriaName = criteriaDict.TryGetValue((int)e.GetType().GetProperty("CriteriaID")?.GetValue(e), out var cName) ? cName : "Unknown",
-
-                    Students = ((IEnumerable<dynamic>)e.GetType().GetProperty("Students")?.GetValue(e))
-                        .Select(s => new
+                    var studentEvaluations = await _context.Evaluations
+                        .Where(e => e.Role == "Student" && e.CriteriaId == criteriaId)
+                        .GroupBy(e => new { e.CriteriaId, e.EvaluateeId })
+                        .Select(g => new
                         {
-                            FullName = usersDict.TryGetValue((int)s.StudentID, out var fullName) ? fullName : "Unknown",
-                            TotalScores = s.TotalScores,
-                            AverageScore = s.AverageScore
+                            StudentID = g.Key.EvaluateeId,
+                            TotalScores = g.Sum(e => e.Score),
+                            AverageScore = g.Average(e => e.Score),
                         })
-                        .ToList()
-                })
-                .ToList();
+                        .OrderByDescending(e => e.TotalScores)
+                        .ToListAsync();
 
-            return Ok(formattedReports);
+                    if (studentEvaluations.Any())
+                    {
+                        allEvaluations.Add(new
+                        {
+                            CriteriaID = criteriaId,
+                            Students = studentEvaluations
+                        });
+
+                        var studentReports = studentEvaluations.Select(evaluation => new StudentReport
+                        {
+                            ReportDate = DateTime.Now,
+                            StudentId = evaluation.StudentID,
+                            TotalScores = evaluation.TotalScores,
+                            AverageScore = evaluation.AverageScore,
+                            CriteriaId = criteriaId
+                        }).ToList();
+
+                        reports.AddRange(studentReports);
+                    }
+                }
+
+                if (reports.Any())
+                {
+                    _context.StudentReports.AddRange(reports);
+                    await _context.SaveChangesAsync();
+
+                    var evaluationsToDelete = await _context.Evaluations
+                        .Where(e => e.Role == "Student")
+                        .ToListAsync();
+
+                    _context.Evaluations.RemoveRange(evaluationsToDelete);
+                    await _context.SaveChangesAsync();
+                }
+
+                var criteriaDict = _context.Criteria
+                    .ToDictionary(c => c.CriteriaId, c => c.CriteriaName);
+
+                var usersDict = _context.Users
+                     .Where(u => u.Role == "Student")
+                    .ToDictionary(u => u.UserId, u => u.FirstName + " " + u.LastName);
+
+                var formattedReports = allEvaluations
+                    .Select(e => new
+                    {
+                        CriteriaName = criteriaDict.TryGetValue((int)e.GetType().GetProperty("CriteriaID")?.GetValue(e), out var cName) ? cName : "Unknown",
+
+                        Students = ((IEnumerable<dynamic>)e.GetType().GetProperty("Students")?.GetValue(e))
+                            .Select(s => new
+                            {
+                                FullName = usersDict.TryGetValue((int)s.StudentID, out var fullName) ? fullName : "Unknown",
+                                TotalScores = s.TotalScores,
+                                AverageScore = s.AverageScore
+                            })
+                            .ToList()
+                    })
+                    .ToList();
+
+                return Ok(formattedReports);
+            }
+            catch(Exception ex)
+            {
+                Logger.Error("{0} : {1} ", DateTime.Now, ex.Message);
+                return BadRequest();
+            }
+            finally
+            {
+                Logger.Info("{0} : Succes GenerateStudentReports ", DateTime.Now);
+            }
         }
 
         // 3. Դասախոսների ռեպորտների ստացում
@@ -379,20 +398,36 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetTeachers()
         {
-            var users = _context.Users.Where(u => u.Role == "Teacher").ToList();
-
-            List<UserGetResponse> userResponse = new();
-            foreach (var user in users)
+            try
             {
-                userResponse.Add(_mapper.Map<UserGetResponse>(user));
-            }
+                var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var admin = _context.Users.FirstOrDefault(u => u.UserId == adminId && u.Role == "Admin");
+                Logger.Info("{0} : GetTeachers : {1}", DateTime.Now, admin.Email);
 
-            if (userResponse == null || userResponse.Count == 0)
+                var users = _context.Users.Where(u => u.Role == "Teacher").ToList();
+
+                List<UserGetResponse> userResponse = new();
+                foreach (var user in users)
+                {
+                    userResponse.Add(_mapper.Map<UserGetResponse>(user));
+                }
+
+                if (userResponse == null || userResponse.Count == 0)
+                {
+                    return NotFound("Ոչ մի դասախոս չգտնվեց:");
+                }
+
+                return Ok(userResponse);
+            }
+            catch (Exception ex)
             {
-                return NotFound("Ոչ մի դասախոս չգտնվեց:");
+                Logger.Error("{0} : {1} ", DateTime.Now, ex.Message);
+                return BadRequest();
             }
-
-            return Ok(userResponse);
+            finally
+            {
+                Logger.Info("{0} : Success GetTeachers ", DateTime.Now);
+            }
         }
         // 8. Ուսանողների ստացում
         [HttpGet("Students")]
@@ -400,20 +435,36 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetStudents()
         {
-            var users = _context.Users.Where(u => u.Role == "Student").ToList();
-
-            List<UserGetResponse> userResponse = new();
-            foreach (var user in users)
+            try
             {
-                userResponse.Add(_mapper.Map<UserGetResponse>(user));
-            }
+                var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var admin = _context.Users.FirstOrDefault(u => u.UserId == adminId && u.Role == "Admin");
+                Logger.Info("{0} : GetStudents : {1}", DateTime.Now, admin.Email);
 
-            if (userResponse == null || userResponse.Count == 0)
+                var users = _context.Users.Where(u => u.Role == "Student").ToList();
+
+                List<UserGetResponse> userResponse = new();
+                foreach (var user in users)
+                {
+                    userResponse.Add(_mapper.Map<UserGetResponse>(user));
+                }
+
+                if (userResponse == null || userResponse.Count == 0)
+                {
+                    return NotFound("Ոչ մի ուսանող չգտնվեց:");
+                }
+
+                return Ok(userResponse);
+            }
+            catch (Exception ex)
             {
-                return NotFound("Ոչ մի ուսանող չգտնվեց:");
+                Logger.Error("{0} : {1} ", DateTime.Now, ex.Message);
+                return BadRequest();
             }
-
-            return Ok(userResponse);
+            finally
+            {
+                Logger.Info("{0} : Success GetStudents ", DateTime.Now);
+            }
         }
         // 9. Ադմինների ստացում
         [HttpGet("Admins")]
@@ -421,20 +472,36 @@ namespace WebApplication1.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public IActionResult GetAdmins()
         {
-            var users = _context.Users.Where(u => u.Role == "Teacher").ToList();
-
-            List<UserGetResponse> userResponse = new();
-            foreach (var user in users)
+            try
             {
-                userResponse.Add(_mapper.Map<UserGetResponse>(user));
-            }
+                var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var admin = _context.Users.FirstOrDefault(u => u.UserId == adminId && u.Role == "Admin");
+                Logger.Info("{0} : GetAdmins : {1}", DateTime.Now, admin.Email);
 
-            if (userResponse == null || userResponse.Count == 0)
+                var users = _context.Users.Where(u => u.Role == "Teacher").ToList();
+
+                List<UserGetResponse> userResponse = new();
+                foreach (var user in users)
+                {
+                    userResponse.Add(_mapper.Map<UserGetResponse>(user));
+                }
+
+                if (userResponse == null || userResponse.Count == 0)
+                {
+                    return NotFound("Ոչ մի ադմին չգտնվեց:");
+                }
+
+                return Ok(userResponse);
+            }
+            catch (Exception ex)
             {
-                return NotFound("Ոչ մի ադմին չգտնվեց:");
+                Logger.Error("{0} : {1} ", DateTime.Now, ex.Message);
+                return BadRequest();
             }
-
-            return Ok(userResponse);
+            finally
+            {
+                Logger.Info("{0} : Success GetAdmins ", DateTime.Now);
+            }
         }
     }
 
