@@ -315,7 +315,7 @@ namespace WebApplication1.Controllers
         [HttpPost("getStudents")]
         [ProducesResponseType(typeof(List<User>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        private async Task<IActionResult> getStudents(int courseId)
+        private List<User> getStudents(int courseId)
         {
             try
             {
@@ -333,12 +333,12 @@ namespace WebApplication1.Controllers
                     throw new Exception("Տվյալ կուրսում ուսանող չկա");
                 }
 
-                return Ok(students);
+                return students;
             }
             catch (Exception ex)
             {
                 Logger.Error("GetTeachersForStudent: {0} : {1} ", DateTime.Now, ex.Message);
-                return BadRequest();
+                return new List<User>();
             }
             finally
             {
